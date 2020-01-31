@@ -1,0 +1,26 @@
+# Ignore .git folder 
+.git/*
+**/*/.git/*
+
+# Ignore IntelliJ related files
+.idea/*
+**/*/.idea/*
+*.iws
+*.iml
+*.ipr
+
+# Ignore all java related compiled and dev only files
+target/*
+**/*/target/*
+
+# Ignore all python related files
+env/*
+**/*/env/*
+
+# Ignore all maven related files
+.mvn/*
+**/*/.mvn/*
+
+# Ignore all NodeJS related files
+node_modules
+**/*/node_modules/*
