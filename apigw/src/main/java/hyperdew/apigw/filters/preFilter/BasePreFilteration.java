@@ -1,16 +1,11 @@
 package hyperdew.apigw.filters.preFilter;
 
-import com.netflix.ribbon.proxy.annotation.Http;
-import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
-import com.netflix.zuul.exception.ZuulException;
+import hyperdew.apigw.utilities.RequestHeaders;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpStatus;
-import org.apache.http.protocol.HTTP;
-import org.springframework.web.client.HttpClientErrorException;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 
 public class BasePreFilteration {
     /**
@@ -31,8 +26,8 @@ public class BasePreFilteration {
 
     public void interceptRequest(RequestContext requestCtx) {
         HttpServletRequest request = requestCtx.getRequest();
-        // TODO - Get Header name from Enum
-        if (StringUtils.defaultString(request.getHeader("auth"), StringUtils.EMPTY).isEmpty()) {
+
+        if (StringUtils.defaultString(request.getHeader(RequestHeaders.SECRET_APP_KEY.getHeaderName()), StringUtils.EMPTY).isEmpty()) {
             populateUnauthorizedResponse(requestCtx);
         }
     }
