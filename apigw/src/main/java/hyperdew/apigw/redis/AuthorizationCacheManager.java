@@ -3,9 +3,8 @@ package hyperdew.apigw.redis;
 import com.netflix.zuul.context.RequestContext;
 import hyperdew.apigw.authorization.AuthResponse;
 import hyperdew.apigw.authorization.AuthorizationService;
-import hyperdew.apigw.utilities.RequestHeaders;
+import hyperdew.apigw.utilities.RequestContextUtils;
 import hyperdew.apigw.utilities.SpringContextProvider;
-import org.apache.commons.lang.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -34,8 +33,8 @@ public class AuthorizationCacheManager {
             return null;
         }
 
-        String appSecret = StringUtils.defaultString(request.getHeader(RequestHeaders.SECRET_APP_KEY.getHeaderName()));
-        String authToken = StringUtils.defaultString(request.getHeader(RequestHeaders.ACCESS_TOKEN.getHeaderName()));
+        String appSecret = RequestContextUtils.getAppSecretFromRequest(requestContext);
+        String authToken = RequestContextUtils.getAccessTokenFromRequest(requestContext);
 
         return appSecret.concat(authToken);
     }

@@ -3,11 +3,11 @@ package hyperdew.apigw.filters.preFilter;
 import com.netflix.zuul.context.RequestContext;
 import hyperdew.apigw.authorization.AuthResponse;
 import hyperdew.apigw.redis.AuthorizationCacheManager;
+import hyperdew.apigw.utilities.RequestContextUtils;
 import hyperdew.apigw.utilities.RequestHeaders;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpStatus;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
 
@@ -15,10 +15,15 @@ public class BasePreFilteration {
 
     private AuthorizationCacheManager authorizationCacheManager;
     private RequestContext requestCtx;
+    private String ACCESS_TOKEN;
+    private String APP_SECRET_KEY;
 
     public BasePreFilteration(RequestContext requestCtx) {
         this.requestCtx = requestCtx;
         authorizationCacheManager = AuthorizationCacheManager.getInstance();
+
+        ACCESS_TOKEN = RequestContextUtils.getAccessTokenFromRequest(requestCtx);
+        APP_SECRET_KEY = RequestContextUtils.getAppSecretFromRequest(requestCtx);
     }
 
     /**
@@ -44,13 +49,12 @@ public class BasePreFilteration {
      * If no, calls authorization MS
      */
     private void performBasicHeaderChecks() {
-        HttpServletRequest request = requestCtx.getRequest();
 
-        if (StringUtils.defaultString(request.getHeader(RequestHeaders.SECRET_APP_KEY.getHeaderName())).isEmpty()) {
+        if (APP_SECRET_KEY.isEmpty()) {
             populateUnauthorizedResponse();
         }
 
-        if (StringUtils.defaultString(request.getHeader(RequestHeaders.ACCESS_TOKEN.getHeaderName())).isEmpty()) {
+        if (ACCESS_TOKEN.isEmpty()) {
             updateAccessTokenInHeader();
         }
     }
@@ -61,9 +65,9 @@ public class BasePreFilteration {
         if (authResponse == null || StringUtils.defaultString(authResponse.getAccessToken()).isEmpty()) {
             populateUnauthorizedResponse();
         }
-
-        requestCtx.addZuulRequestHeader(RequestHeaders.ACCESS_TOKEN.getHeaderName(), authResponse.getAccessToken());
-
+        System.out.println(RequestContextUtils.getAccessTokenFromRequest(requestCtx));
+        RequestContextUtils.addHeaderToRequest(requestCtx, RequestHeaders.ACCESS_TOKEN.getHeaderName(), authResponse.getAccessToken());
+        System.out.println(RequestContextUtils.getAccessTokenFromRequest(requestCtx));
     }
 
     private void validateTokenExpiry(AuthResponse authResponse) {
