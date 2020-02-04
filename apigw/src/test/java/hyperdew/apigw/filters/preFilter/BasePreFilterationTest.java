@@ -17,8 +17,6 @@ class BasePreFilterationTest {
 
     @BeforeEach
     void initialize() {
-        basePreFilter = new BasePreFilteration();
-
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -26,6 +24,8 @@ class BasePreFilterationTest {
         requestCtx.setRequest(request);
         requestCtx.setResponse(response);
         requestCtx.setResponseStatusCode(HttpStatus.SC_OK);
+
+        basePreFilter = new BasePreFilteration(requestCtx);
     }
 
     @Test
@@ -39,14 +39,14 @@ class BasePreFilterationTest {
         request.addHeader(RequestHeaders.SECRET_APP_KEY.getHeaderName(), "testSecret");
 
         requestCtx.setRequest(request);
-        basePreFilter.interceptRequest(requestCtx);
+        basePreFilter.interceptRequest();
 
         assertEquals(HttpStatus.SC_OK, requestCtx.getResponseStatusCode());
     }
 
     @Test
     void interceptRequest_invalidSecretAppKeyTest() {
-        basePreFilter.interceptRequest(requestCtx);
+        basePreFilter.interceptRequest();
 
         assertEquals(HttpStatus.SC_UNAUTHORIZED, requestCtx.getResponseStatusCode());
     }

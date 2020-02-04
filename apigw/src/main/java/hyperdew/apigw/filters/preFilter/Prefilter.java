@@ -30,10 +30,10 @@ public class Prefilter extends ZuulFilter {
         System.out.println("Request Method : " + request.getMethod() + " Request URL : " + request.getRequestURL().toString());
 
         // TODO - Get Filter from a generic HashMap
-        BasePreFilteration filter = new BasePreFilteration();
+        BasePreFilteration filter = new BasePreFilteration(ctx);
 
         if (filter.shouldInterceptRequest()) {
-            filter.interceptRequest(ctx);
+            filter.interceptRequest();
         }
 
         return null;
