@@ -65,9 +65,8 @@ public class BasePreFilteration {
         if (authResponse == null || StringUtils.defaultString(authResponse.getAccessToken()).isEmpty()) {
             populateUnauthorizedResponse();
         }
-        System.out.println(RequestContextUtils.getAccessTokenFromRequest(requestCtx));
+
         RequestContextUtils.addHeaderToRequest(requestCtx, RequestHeaders.ACCESS_TOKEN.getHeaderName(), authResponse.getAccessToken());
-        System.out.println(RequestContextUtils.getAccessTokenFromRequest(requestCtx));
     }
 
     private void validateTokenExpiry(AuthResponse authResponse) {
