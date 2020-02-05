@@ -7,11 +7,15 @@ import hyperdew.apigw.utilities.RequestContextUtils;
 import hyperdew.apigw.utilities.RequestHeaders;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 
 
-public class BasePreFilteration {
+public class BasePreFilteration implements PreFilteration {
+
+    private static final Logger logger = LoggerFactory.getLogger(BasePreFilteration.class);
 
     private AuthorizationCacheManager authorizationCacheManager;
     private RequestContext requestCtx;
@@ -26,16 +30,13 @@ public class BasePreFilteration {
         APP_SECRET_KEY = RequestContextUtils.getAppSecretFromRequest(requestCtx);
     }
 
-    /**
-     * Basic checks if need to filter this request or simply reverse proxy it
-     */
+    @Override
     public boolean shouldInterceptRequest() {
         return true;
     }
 
     private void populateUnauthorizedResponse() {
-        //TODO - Replace with logger
-        System.out.println("Unauthorized Request");
+        logger.info("Unauthorized Request. Returning back to client with 401 Unauthorized Status");
 
         requestCtx.setResponseStatusCode(HttpStatus.SC_UNAUTHORIZED);
         requestCtx.setResponseBody("Unauthorized to make this request. Please add valid authentication headers as per API Contract");
@@ -87,6 +88,7 @@ public class BasePreFilteration {
         checkIfHeadersAreValid();
     }
 
+    @Override
     public void interceptRequest() {
         performAuthentication();
     }

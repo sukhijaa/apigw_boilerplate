@@ -7,7 +7,7 @@ public enum RequestHeaders {
 
     private String headerValue;
 
-    private RequestHeaders(final String value) {
+    RequestHeaders(final String value) {
         this.headerValue = value;
     }
 

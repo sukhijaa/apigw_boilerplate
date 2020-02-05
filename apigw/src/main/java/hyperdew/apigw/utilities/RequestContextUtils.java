@@ -29,6 +29,7 @@ public class RequestContextUtils {
         }
 
         requestCtx.addZuulRequestHeader(headerName, StringUtils.defaultString(headerValue));
+        requestCtx.addZuulResponseHeader(headerName, StringUtils.defaultString(headerValue));
     }
 
     public static String getAppSecretFromRequest(RequestContext requestContext) {
@@ -37,5 +38,30 @@ public class RequestContextUtils {
 
     public static String getAccessTokenFromRequest(RequestContext requestContext) {
         return getHeaderFromRequest(requestContext, RequestHeaders.ACCESS_TOKEN.getHeaderName());
+    }
+
+    private static String getRequestURLFromContext(RequestContext requestContext) {
+        HttpServletRequest request = requestContext.getRequest();
+
+        if (request == null) {
+            return StringUtils.EMPTY;
+        }
+
+        return StringUtils.defaultString(request.getRequestURI());
+    }
+
+    public static String getMSNameFromRequest(RequestContext requestContext) {
+        String requestURL = getRequestURLFromContext(requestContext);
+
+        if (requestURL.startsWith("/")) {
+            requestURL = requestURL.replaceFirst("/", "");
+        }
+
+        int slashLocation = requestURL.indexOf("/");
+        if (slashLocation != -1) {
+            requestURL = requestURL.substring(0, slashLocation);
+        }
+
+        return StringUtils.defaultString(requestURL);
     }
 }

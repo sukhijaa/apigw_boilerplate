@@ -1,6 +1,6 @@
 package hyperdew.apigw;
 
-import hyperdew.apigw.filters.Postfilter;
+import hyperdew.apigw.filters.postFilter.Postfilter;
 import hyperdew.apigw.filters.preFilter.Prefilter;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
