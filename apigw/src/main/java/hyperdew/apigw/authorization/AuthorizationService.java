@@ -1,6 +1,7 @@
 package hyperdew.apigw.authorization;
 
 import com.netflix.zuul.context.RequestContext;
+import hyperdew.apigw.utilities.RequestContextUtils;
 import hyperdew.apigw.utilities.SpringContextProvider;
 
 /**
@@ -25,7 +26,8 @@ public class AuthorizationService {
     }
 
     public AuthResponse getAuthTokenFromAuthorizationMS(RequestContext requestContext) {
-        AuthResponse authResponse = authServiceClientKit.getAuthToken();
+        AuthResponse authResponse = authServiceClientKit.getAccessTokenBasedOnAppSecret(
+                RequestContextUtils.getAppSecretFromRequest(requestContext));
         return authResponse;
     }
 
