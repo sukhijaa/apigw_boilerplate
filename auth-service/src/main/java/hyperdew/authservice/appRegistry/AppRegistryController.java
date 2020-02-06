@@ -7,14 +7,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/app")
+@RequestMapping("/application")
 public class AppRegistryController {
 
     @Autowired
     private ApplicationRepository applicationRepository;
 
     //TODO - Only Admin should be allowed to allowed
-    @PostMapping("/new")
+    @PostMapping
     public ApplicationModel createNewApp(@RequestBody ApplicationModel appModel) {
         applicationRepository.save(appModel);
         return appModel;

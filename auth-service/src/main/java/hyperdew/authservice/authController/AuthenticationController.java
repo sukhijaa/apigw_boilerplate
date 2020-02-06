@@ -1,7 +1,6 @@
 package hyperdew.authservice.authController;
 
 import hyperdew.authservice.authentication.AuthResponse;
-import hyperdew.authservice.authentication.CreateUserBody;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Calendar;
@@ -34,13 +33,6 @@ public class AuthenticationController {
 
     @GetMapping("/generateToken")
     public AuthResponse getAccessTokenBasedOnAppSecret(@RequestHeader("app-secret") String appSecret) {
-        return generateDummyAuthResponse(appSecret);
-    }
-
-    @PostMapping("/createUser")
-    public AuthResponse createNewUserForAppSecret(
-            @RequestHeader("app-secret") String appSecret,
-            @RequestBody CreateUserBody userDetails) {
         return generateDummyAuthResponse(appSecret);
     }
 
