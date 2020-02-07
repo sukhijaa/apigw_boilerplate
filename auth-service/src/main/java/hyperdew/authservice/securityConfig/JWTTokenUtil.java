@@ -3,6 +3,7 @@ package hyperdew.authservice.securityConfig;
 
 import hyperdew.authservice.appRegistry.ApplicationModel;
 import hyperdew.authservice.userRegistry.UserModel;
+import hyperdew.authservice.utils.Roles;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -13,6 +14,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 
@@ -59,7 +61,7 @@ public class JWTTokenUtil implements Serializable {
 
     public String generateToken(UserModel userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        return doGenerateToken(claims, userDetails.getUserName(), userDetails.getId());
+        return doGenerateToken(claims, userDetails.getUserName(), String.valueOf(userDetails.getId()));
     }
 
     public String generateTokenForApp(ApplicationModel appDetails) {
@@ -87,5 +89,18 @@ public class JWTTokenUtil implements Serializable {
         String appId = getIdFromToken(token);
 
         return appName.equals(applicationModel.getApplicationName()) && appId.equals(applicationModel.getId()) && !isTokenExpired(token);
+    }
+
+    public String getToken(long id, String name, Date expiry, String role) {
+        role = Optional.ofNullable(role).orElse(Roles.GUEST_ROLE);
+        expiry = Optional.ofNullable(expiry).orElse(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000));
+        return Jwts.builder()
+                .claim(Roles.TOKEN_ROLE_IDENTIFIER, role)
+                .setId(String.valueOf(id))
+                .setSubject(name)
+                .setExpiration(expiry)
+                .setIssuedAt(new Date())
+                .signWith(SignatureAlgorithm.HS512, secret)
+                .compact();
     }
 }

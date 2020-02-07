@@ -20,8 +20,6 @@ public class ApplicationModel {
 
     private String applicationName;
 
-    private String applicationPassword;
-
     private String applicationDisplayName;
 
 }
