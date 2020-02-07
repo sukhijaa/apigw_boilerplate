@@ -20,7 +20,7 @@ public class UserController {
             @RequestHeader("app-secret") String appSecret,
             @RequestBody UserModel userData) {
         // TODO - Get app Id from appSecret
-        String appId = "abc";
+        long appId = 0;
         ApplicationModel selectedApp = applicationRepository.findById(appId);
         userData.setApplicationModel(selectedApp);
         userRepository.save(userData);

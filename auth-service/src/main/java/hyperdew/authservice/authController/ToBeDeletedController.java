@@ -13,4 +13,9 @@ public class ToBeDeletedController {
     public String getMapping() {
         return "Inside Auth Ms";
     }
+
+    @GetMapping("/abhi")
+    public String getAbhiMapping() {
+        return "Inside Test Class";
+    }
 }

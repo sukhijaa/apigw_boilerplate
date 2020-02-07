@@ -12,8 +12,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -26,6 +24,14 @@ public class JWTTokenUtil implements Serializable {
 
     @Value("${jwt.secret}")
     private String secret;
+
+    private String getTokenIfContainsBearer(String token) {
+        if (token.startsWith("Bearer ")) {
+            return token.substring(7);
+        }
+
+        return token;
+    }
 
     //retrieve username from jwt token
     public String getUsernameFromToken(String token) {
@@ -43,6 +49,7 @@ public class JWTTokenUtil implements Serializable {
     }
 
     public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
+        token = getTokenIfContainsBearer(token);
         final Claims claims = getAllClaimsFromToken(token);
         return claimsResolver.apply(claims);
     }
@@ -60,20 +67,19 @@ public class JWTTokenUtil implements Serializable {
 
 
     public String generateToken(UserModel userDetails) {
-        Map<String, Object> claims = new HashMap<>();
-        return doGenerateToken(claims, userDetails.getUserName(), String.valueOf(userDetails.getId()));
+        return getToken(userDetails.getId(), userDetails.getUserName(), null, userDetails.getUserRole());
     }
 
-    public String generateTokenForApp(ApplicationModel appDetails) {
-        Map<String, Object> claims = new HashMap<>();
-        return doGenerateToken(claims, appDetails.getApplicationName(), appDetails.getId());
+    public String generateToken(UserModel userModel, Date expiry) {
+        return getToken(userModel.getId(), userModel.getUserName(), expiry, userModel.getUserRole());
     }
 
+    public String generateToken(ApplicationModel appDetails) {
+        return getToken(appDetails.getId(), appDetails.getApplicationName(), null, Roles.APP_ROLE);
+    }
 
-    private String doGenerateToken(Map<String, Object> claims, String subject, String id) {
-        return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis())).setId(id)
-                .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000))
-                .signWith(SignatureAlgorithm.HS512, secret).compact();
+    public String generateToken(ApplicationModel appDetails, Date expiry) {
+        return getToken(appDetails.getId(), appDetails.getApplicationName(), expiry, Roles.APP_ROLE);
     }
 
 
@@ -81,7 +87,9 @@ public class JWTTokenUtil implements Serializable {
         String username = getUsernameFromToken(token);
         String userId = getIdFromToken(token);
 
-        return username.equals(userDetails.getUserName()) && userId.equals(userDetails.getId()) && !isTokenExpired(token);
+        return username.equals(userDetails.getUserName()) &&
+                userId.equals(String.valueOf(userDetails.getId())) &&
+                !isTokenExpired(token);
     }
 
     public Boolean validateToken(String token, ApplicationModel applicationModel) {
@@ -94,7 +102,8 @@ public class JWTTokenUtil implements Serializable {
     public String getToken(long id, String name, Date expiry, String role) {
         role = Optional.ofNullable(role).orElse(Roles.GUEST_ROLE);
         expiry = Optional.ofNullable(expiry).orElse(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000));
-        return Jwts.builder()
+
+        String jwtToken = Jwts.builder()
                 .claim(Roles.TOKEN_ROLE_IDENTIFIER, role)
                 .setId(String.valueOf(id))
                 .setSubject(name)
@@ -102,5 +111,7 @@ public class JWTTokenUtil implements Serializable {
                 .setIssuedAt(new Date())
                 .signWith(SignatureAlgorithm.HS512, secret)
                 .compact();
+
+        return "Bearer ".concat(jwtToken);
     }
 }

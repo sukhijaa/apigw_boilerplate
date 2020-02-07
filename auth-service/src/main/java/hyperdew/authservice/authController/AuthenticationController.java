@@ -9,6 +9,8 @@ import hyperdew.authservice.securityConfig.JWTTokenUtil;
 import hyperdew.authservice.userRegistry.UserModel;
 import hyperdew.authservice.userRegistry.UserRepository;
 import hyperdew.authservice.utils.Constants;
+import hyperdew.authservice.utils.RequestContextUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -56,8 +58,10 @@ public class AuthenticationController {
 
     @GetMapping("/generatetoken")
     public AuthResponse getAccessTokenBasedOnAppSecret(@RequestHeader("app-secret") String appSecret) {
-        String appId = jwtTokenUtil.getIdFromToken(appSecret);
-        ApplicationModel appData = Optional.ofNullable(applicationRepository.findById(appId))
+        appSecret = RequestContextUtils.getAccessTokenFromRequestHeader(appSecret);
+
+        String appId = StringUtils.defaultString(jwtTokenUtil.getIdFromToken(appSecret));
+        ApplicationModel appData = Optional.ofNullable(applicationRepository.findById(Long.parseLong(appId)))
                 .orElseThrow(() -> new AuthenticationFailed("Failed to get Application Data from app-secret"));
 
         UserModel userDetails = Optional.ofNullable(
@@ -83,7 +87,7 @@ public class AuthenticationController {
             throw new AuthenticationFailed(String.format("Password does not match for the user : %s", userName));
         }
 
-        String jwtToken = jwtTokenUtil.getToken(userDetails.getId(), userName, null, userDetails.getUserRole());
+        String jwtToken = jwtTokenUtil.generateToken(userDetails);
 
         return new AuthResponse(jwtToken);
     }

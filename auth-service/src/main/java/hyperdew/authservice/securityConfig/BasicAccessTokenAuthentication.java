@@ -1,14 +1,18 @@
 package hyperdew.authservice.securityConfig;
 
-import hyperdew.authservice.appRegistry.ApplicationModel;
-import hyperdew.authservice.appRegistry.ApplicationRepository;
+import hyperdew.authservice.exception.AuthenticationFailed;
+import hyperdew.authservice.userRegistry.UserModel;
+import hyperdew.authservice.userRegistry.UserRepository;
+import hyperdew.authservice.utils.RequestContextUtils;
+import hyperdew.authservice.utils.SpringContextProvider;
 import io.jsonwebtoken.ExpiredJwtException;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -16,51 +20,46 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 
 public class BasicAccessTokenAuthentication extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(BasicAccessTokenAuthentication.class);
 
-    @Autowired
-    private JWTTokenUtil jwtTokenUtil;
-
-    @Autowired
-    private ApplicationRepository applicationRepository;
-
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
-        final String requestTokenHeader = httpServletRequest.getHeader("app-secret");
+        final JWTTokenUtil jwtTokenUtil = SpringContextProvider.getBean(JWTTokenUtil.class);
+        final UserRepository userRepository = SpringContextProvider.getBean(UserRepository.class);
 
-        String appId = null;
-        String jwtToken = null;
+        String jwtToken = Optional.of(RequestContextUtils.getAccessTokenFromRequest(httpServletRequest))
+                .orElseThrow(() -> new AuthenticationFailed("Failed in BasicAccessTokenAuthentication. No Access Token Found"));
 
-        if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
-            jwtToken = requestTokenHeader.substring(7);
-            try {
-                appId = jwtTokenUtil.getIdFromToken(jwtToken);
-            } catch (IllegalArgumentException e) {
-                logger.info("Unable to get username from JWT Token. Possibly token is not signed properly");
-            } catch (ExpiredJwtException e) {
-                logger.info("JWT Token has expired. Please refresh the token");
-            }
-        } else {
-            logger.warn("JWT Token does not begin with Bearer String");
+        String userId = null;
+
+        try {
+            userId = Optional.ofNullable(jwtTokenUtil.getIdFromToken(jwtToken)).orElse(StringUtils.EMPTY);
+        } catch (IllegalArgumentException e) {
+            logger.info("Unable to get username from JWT Token. Possibly token is not signed properly");
+        } catch (ExpiredJwtException e) {
+            logger.info("JWT Token has expired. Please refresh the token");
         }
 
+        if (userId != null && !userId.isEmpty()) {
 
-        if (appId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            ApplicationModel appDetails = applicationRepository.findById(appId);
+            UserModel userDetails = userRepository.findById(Long.parseLong(userId));
 
 
-            if (jwtTokenUtil.validateToken(jwtToken, appDetails)) {
-                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-                        appDetails, null);
+            if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
 
-                usernamePasswordAuthenticationToken
-                        .setDetails(new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));
+                List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
+                authorities.add(new GrantedAuthorityImpl(userDetails.getUserRole()));
 
-                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+                Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), authorities);
+
+                SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         }
 

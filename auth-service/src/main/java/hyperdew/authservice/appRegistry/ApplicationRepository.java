@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ApplicationRepository extends JpaRepository<ApplicationModel, Long> {
 
-    ApplicationModel findById(String id);
+    ApplicationModel findById(long id);
 
     ApplicationModel findByApplicationName(String appName);
 

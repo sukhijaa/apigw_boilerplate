@@ -31,4 +31,10 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         GenericExceptionContainer exc = new GenericExceptionContainer(new Date(), ex.getMessage(), wb.getDescription(false));
         return new ResponseEntity(exc, HttpStatus.UNAUTHORIZED);
     }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    public final ResponseEntity<Object> invalidTokenException(InvalidTokenException ex, WebRequest wb) {
+        GenericExceptionContainer exc = new GenericExceptionContainer(new Date(), ex.getMessage(), wb.getDescription(false));
+        return new ResponseEntity(exc, HttpStatus.BAD_REQUEST);
+    }
 }
