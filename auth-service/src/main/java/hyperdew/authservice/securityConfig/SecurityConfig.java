@@ -2,6 +2,7 @@ package hyperdew.authservice.securityConfig;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -12,19 +13,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true, jsr250Enabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private static final String IGNORED_API_MATCHERS = "/authenticate/**";
-
-//    @Bean
-//    public UserDetailsService userDetailsService() {
-//        InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
-//        manager.createUser(User
-//                .withUsername("hyperdew")
-//                .password(encoder().encode("password"))
-//                .roles("USER").build());
-//        return manager;
-//    }
 
     @Bean
     public PasswordEncoder encoder() {

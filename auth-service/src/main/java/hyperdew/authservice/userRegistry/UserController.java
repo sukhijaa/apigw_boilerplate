@@ -2,8 +2,11 @@ package hyperdew.authservice.userRegistry;
 
 import hyperdew.authservice.appRegistry.ApplicationModel;
 import hyperdew.authservice.appRegistry.ApplicationRepository;
+import hyperdew.authservice.utils.Roles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.security.RolesAllowed;
 
 @RestController
 @RequestMapping("/user")
@@ -16,6 +19,7 @@ public class UserController {
     private UserRepository userRepository;
 
     @PostMapping
+    @RolesAllowed(Roles.ADMIN_ROLE)
     public UserModel createUser(
             @RequestHeader("app-secret") String appSecret,
             @RequestBody UserModel userData) {

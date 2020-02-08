@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -51,14 +52,15 @@ public class BasicAccessTokenAuthentication extends OncePerRequestFilter {
 
             UserModel userDetails = userRepository.findById(Long.parseLong(userId));
 
-
             if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
 
                 List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
-                authorities.add(new GrantedAuthorityImpl(userDetails.getUserRole()));
+                authorities.add(new SimpleGrantedAuthority(userDetails.getUserRole()));
 
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), authorities);
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));
+
+                logger.debug("Role Assigned to current user : " + userDetails.getUserRole());
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
