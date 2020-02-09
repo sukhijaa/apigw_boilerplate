@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Calendar;
 import java.util.Optional;
 
 
@@ -35,25 +34,18 @@ public class AuthenticationController {
     @Autowired
     private PasswordEncoder bCryptPasswordEncoder;
 
-    private AuthResponse generateDummyAuthResponse(String appSecret) {
-        Calendar tokenExpiry = Calendar.getInstance();
-        tokenExpiry.add(Calendar.SECOND, 60);
-
-        AuthResponse authResponse = new AuthResponse();
-        authResponse.setUserName("Dummy UserName");
-        authResponse.setAccessToken("Access Token : Expiring on  : " + tokenExpiry.getTime().toString());
-        authResponse.setAppSecret(appSecret);
-        authResponse.setTokenExpiry(tokenExpiry.getTime());
-        authResponse.setRefreshToken("Dummy Refresh Token");
-
-        return authResponse;
-    }
-
     @GetMapping("/")
     public AuthResponse authenticateUserBasedOnAccessToken(
             @RequestHeader("app-secret") String appSecret,
             @RequestHeader("access-token") String accessToken) {
-        return generateDummyAuthResponse(appSecret);
+        AuthResponse newResponse = new AuthResponse();
+        newResponse.setRefreshToken(accessToken);
+        newResponse.setAccessToken(accessToken);
+        newResponse.setAppSecret(appSecret);
+        newResponse.setTokenExpiry(jwtTokenUtil.getExpirationDateFromToken(accessToken));
+        newResponse.setUserName(jwtTokenUtil.getUsernameFromToken(accessToken));
+
+        return newResponse;
     }
 
     @GetMapping("/generatetoken")
