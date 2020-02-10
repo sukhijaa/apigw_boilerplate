@@ -7,7 +7,7 @@ import lombok.Setter;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-
+// TODO : Rename to Account
 @Entity
 @NoArgsConstructor
 @Getter

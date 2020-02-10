@@ -35,6 +35,7 @@ public class Prefilter extends ZuulFilter {
 
         logger.debug("Request Method : " + request.getMethod() + " Request URL : " + request.getRequestURL().toString());
 
+        // TODO : Make a selector factory
         PreFilteration filter = (PreFilteration) new PreFilterSelector().getFilter(ctx);
 
         if (filter.shouldInterceptRequest()) {

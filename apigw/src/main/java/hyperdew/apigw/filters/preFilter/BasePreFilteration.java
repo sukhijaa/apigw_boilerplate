@@ -83,6 +83,7 @@ public class BasePreFilteration implements PreFilteration {
 
     }
 
+    // TODO - Use abstract performAuthetication
     private void performAuthentication() {
         performBasicHeaderChecks();
         checkIfHeadersAreValid();
