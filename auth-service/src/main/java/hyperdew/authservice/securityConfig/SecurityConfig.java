@@ -32,7 +32,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Override
-    public void configure(WebSecurity web) throws Exception {
-        web.ignoring().mvcMatchers(IGNORED_API_MATCHERS);
+    public void configure(WebSecurity web) {
+        web.ignoring().mvcMatchers(IGNORED_API_MATCHERS,
+                "/v2/api-docs",
+                "/configuration/ui",
+                "/swagger-resources/**",
+                "/configuration/security",
+                "/swagger-ui.html",
+                "/webjars/**");
     }
 }
